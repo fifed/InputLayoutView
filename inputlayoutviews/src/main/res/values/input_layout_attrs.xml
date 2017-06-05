@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="Inputlayout">
+
+        <attr name="hint_text" format="string"/>
+        <attr name="hint_text_size" format="dimension"/>
+        <attr name="hint_color" format="color"/>
+        <attr name="hint_margin_top" format="dimension"/>
+        <attr name="hint_margin_botom" format="dimension"/>
+        <attr name="hint_margin_left" format="dimension"/>
+        <attr name="hint_margin_right" format="dimension"/>
+        <attr name="adjust_hint_floating_distance" format="dimension"/>
+
+
+        <attr name="error_text_size" format="dimension"/>
+        <attr name="error_default_color" format="color"/>
+        <attr name="error_margin_top" format="dimension"/>
+        <attr name="error_margin_bottom" format="dimension"/>
+        <attr name="error_margin_left" format="dimension"/>
+        <attr name="error_margin_right" format="dimension"/>
+        <attr name="empty_error_text" format="string"/>
+
+        <attr name="background_default_edit_text" format="reference"/>
+        <attr name="background_focused_edit_text" format="reference"/>
+        <attr name="background_focused_error_edit_text" format="reference"/>
+        <attr name="background_error_edit_text" format="reference"/>
+
+
+    </declare-styleable>
+
+</resources>
