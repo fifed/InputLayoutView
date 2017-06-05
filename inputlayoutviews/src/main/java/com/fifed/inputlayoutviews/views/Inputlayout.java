@@ -320,11 +320,11 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
                 isValid = true;
             }
         }
-        if(onChangeValidStateListener != null){
-            if(isValidTemp != isValid) {
-                onChangeValidStateListener.onChangeValidState(isValid);
-            }
+
+        if(isValidTemp != isValid) {
+            onChangeValidStateListener.onChangeValidState(isValid);
         }
+
     }
 
     public EditText getEditText() {
