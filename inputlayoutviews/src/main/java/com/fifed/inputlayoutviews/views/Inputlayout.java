@@ -41,7 +41,7 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
     private ArrayList<TextValidator> finishingValidatorList = new ArrayList<>();
     private ArrayList<TextValidator> runtimeValidatorList = new ArrayList<>();
     private OnChangeValidStateListener onChangeValidStateListener;
-    private boolean srarted, hadFocus, isError;
+    private boolean srarted, hadFocus, isError, isValid = true;;
     private InputMethodManager imm;
     private int floatingDistance;
     private static int inputType;
@@ -306,7 +306,7 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
     }
 
     private void checkValidState(){
-        boolean isValid = true;
+        boolean isValidTemp = isValid;
         for (int i = 0; i < finishingValidatorList.size(); i++) {
             ValidatorResponse response = finishingValidatorList.get(i).isValidText(editText.getText().toString(), getContext());
             if (!response.isValid()){
@@ -317,7 +317,9 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
             }
         }
         if(onChangeValidStateListener != null){
-            onChangeValidStateListener.onChangeValidState(isValid);
+            if(isValidTemp != isValid) {
+                onChangeValidStateListener.onChangeValidState(isValid);
+            }
         }
     }
 
