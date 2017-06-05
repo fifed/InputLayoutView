@@ -177,7 +177,9 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
 
         RelativeLayout.LayoutParams errorParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
-
+        if(editText.getId() == View.NO_ID){
+            editText.setId(editText.hashCode());
+        }
         errorParams.addRule(BELOW, editText.getId());
 
         ViewGroup.LayoutParams textParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -228,7 +230,7 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
     }
 
 
-    public void checkEditText() {
+    protected void checkEditText() {
         if (editText.getText().length() != 0) {
             tvHint.animate().translationY(floatingDistance)
                     .scaleX(0.7f).scaleY(0.7f).setDuration(ANIMATION_DURATION);
@@ -319,6 +321,9 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
         }
     }
 
+    public EditText getEditText() {
+        return editText;
+    }
 
     @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
