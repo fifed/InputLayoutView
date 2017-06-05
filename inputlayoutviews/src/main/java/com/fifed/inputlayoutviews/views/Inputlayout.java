@@ -307,6 +307,9 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
     }
 
     private void checkValidState(){
+        if(onChangeValidStateListener == null) {
+            return;
+        }
         boolean isValidTemp = isValid;
         for (int i = 0; i < finishingValidatorList.size(); i++) {
             ValidatorResponse response = finishingValidatorList.get(i).isValidText(editText.getText().toString(), getContext());
