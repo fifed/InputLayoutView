@@ -149,6 +149,7 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
         String errorText = attributes.getString(R.styleable.Inputlayout_empty_error_text);
         if (errorText != null) {
             setEmtyTextValidator(errorText);
+            isValid = false;
         }
     }
 
