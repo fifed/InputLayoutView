@@ -24,6 +24,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.fifed.inputlayoutviews.R;
+import com.fifed.inputlayoutviews.listeners.OnChangeValidStateListener;
 import com.fifed.inputlayoutviews.utils.validators.ValidatorEmptyText;
 import com.fifed.inputlayoutviews.utils.validators.core.TextValidator;
 import com.fifed.inputlayoutviews.utils.validators.core.ValidatorResponse;
@@ -39,6 +40,7 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
     private TextView tvHint, tvError;
     private ArrayList<TextValidator> finishingValidatorList = new ArrayList<>();
     private ArrayList<TextValidator> runtimeValidatorList = new ArrayList<>();
+    private OnChangeValidStateListener onChangeValidStateListener;
     private boolean srarted, hadFocus, isError;
     private InputMethodManager imm;
     private int floatingDistance;
@@ -262,6 +264,10 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
         }
     }
 
+    public void setOnChangeValidStateListener(OnChangeValidStateListener listener) {
+        onChangeValidStateListener = listener;
+    }
+
     public void setEmtyTextValidator(String errorText) {
         addRuntimeValidator(new ValidatorEmptyText(errorText));
     }
@@ -297,6 +303,22 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
         }
     }
 
+    private void checkValidState(){
+        boolean isValid = true;
+        for (int i = 0; i < finishingValidatorList.size(); i++) {
+            ValidatorResponse response = finishingValidatorList.get(i).isValidText(editText.getText().toString(), getContext());
+            if (!response.isValid()){
+                isValid = false;
+                break;
+            } else {
+                isValid = true;
+            }
+        }
+        if(onChangeValidStateListener != null){
+            onChangeValidStateListener.onChangeValidState(isValid);
+        }
+    }
+
 
     @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -309,6 +331,7 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
         setError(null);
         if (srarted && hadFocus) {
             verifyFieldWithRuntimeValidators();
+            checkValidState();
         }
     }
 
