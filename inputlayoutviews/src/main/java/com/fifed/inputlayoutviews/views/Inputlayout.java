@@ -24,6 +24,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.fifed.inputlayoutviews.R;
+import com.fifed.inputlayoutviews.listeners.OnChangeFocusAndTextListener;
 import com.fifed.inputlayoutviews.listeners.OnChangeValidStateListener;
 import com.fifed.inputlayoutviews.utils.validators.ValidatorEmptyText;
 import com.fifed.inputlayoutviews.utils.validators.core.TextValidator;
@@ -41,6 +42,7 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
     private ArrayList<TextValidator> finishingValidatorList = new ArrayList<>();
     private ArrayList<TextValidator> runtimeValidatorList = new ArrayList<>();
     private OnChangeValidStateListener onChangeValidStateListener;
+    private OnChangeFocusAndTextListener onChangeFocusAndTextListener;
     private boolean srarted, hadFocus, isError, isValid = true;;
     private InputMethodManager imm;
     private int floatingDistance;
@@ -271,6 +273,10 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
         onChangeValidStateListener = listener;
     }
 
+    public void setOnChangeFocusAndTextListener(OnChangeFocusAndTextListener listener) {
+        this.onChangeFocusAndTextListener = listener;
+    }
+
     public void setEmtyTextValidator(String errorText) {
         addRuntimeValidator(new ValidatorEmptyText(errorText));
     }
@@ -344,6 +350,9 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
             verifyFieldWithRuntimeValidators();
             checkValidState();
         }
+        if(onChangeFocusAndTextListener != null){
+            onChangeFocusAndTextListener.onChangeText(s.toString());
+        }
     }
 
     @Override
@@ -386,6 +395,9 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
 
     @Override
     public void onFocusChange(View v, boolean hasFocus) {
+        if(onChangeFocusAndTextListener != null){
+            onChangeFocusAndTextListener.onChangeFocus(hasFocus);
+        }
         hadFocus = true;
         if (hasFocus && editText.getText().length() == 0) {
             if (!imm.isActive()) {
