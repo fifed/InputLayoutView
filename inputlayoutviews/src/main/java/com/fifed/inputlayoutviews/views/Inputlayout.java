@@ -27,6 +27,7 @@ import com.fifed.inputlayoutviews.R;
 import com.fifed.inputlayoutviews.listeners.OnChangeFocusListener;
 import com.fifed.inputlayoutviews.listeners.OnChangeTextListener;
 import com.fifed.inputlayoutviews.listeners.OnChangeValidStateListener;
+import com.fifed.inputlayoutviews.listeners.OnErrorListener;
 import com.fifed.inputlayoutviews.utils.validators.ValidatorEmptyText;
 import com.fifed.inputlayoutviews.utils.validators.core.TextValidator;
 import com.fifed.inputlayoutviews.utils.validators.core.ValidatorResponse;
@@ -45,6 +46,7 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
     private OnChangeValidStateListener onChangeValidStateListener;
     private OnChangeFocusListener onChangeFocusListener;
     private OnChangeTextListener onChangeTextListener;
+    private OnErrorListener onErrorListener;
     private boolean srarted, hadFocus, isError, isValid = true;;
     private InputMethodManager imm;
     private int floatingDistance;
@@ -259,6 +261,9 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
             tvError.setText(error);
             tvError.setVisibility(VISIBLE);
             tvError.animate().scaleY(1).scaleX(1).setListener(this).setDuration(ANIMATION_DURATION).start();
+        }
+        if(onErrorListener != null){
+            onErrorListener.onError(error == null);
         }
         if (isError && hasFocus() && etFocusedErrorBackground != 0) {
             editText.setBackgroundResource(etFocusedErrorBackground);
