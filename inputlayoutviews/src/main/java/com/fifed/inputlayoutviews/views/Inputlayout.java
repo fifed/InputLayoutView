@@ -220,7 +220,6 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
         tvHint.setPivotX(0);
         tvError.setPivotX(0);
         tvError.animate().scaleY(0).scaleX(0).setDuration(0).setListener(this).start();
-
     }
 
 
