@@ -262,7 +262,7 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
             tvError.animate().scaleY(1).scaleX(1).setListener(this).setDuration(ANIMATION_DURATION).start();
         }
         if(onErrorListener != null){
-            onErrorListener.onError(error == null);
+            onErrorListener.onError(error != null);
         }
         if (isError && hasFocus() && etFocusedErrorBackground != 0) {
             editText.setBackgroundResource(etFocusedErrorBackground);
