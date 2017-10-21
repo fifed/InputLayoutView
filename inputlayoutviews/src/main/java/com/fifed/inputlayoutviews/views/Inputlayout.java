@@ -276,6 +276,10 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
         }
     }
 
+    public void setOnErrorListener(OnErrorListener listener) {
+        this.onErrorListener = listener;
+    }
+
     public void setOnChangeValidStateListener(OnChangeValidStateListener listener) {
         onChangeValidStateListener = listener;
     }
