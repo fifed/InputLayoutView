@@ -256,6 +256,9 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
             }
 
         } else {
+            if(isError && error.equals(tvError.getText().toString())){
+                return;
+            }
             isError = true;
             tvError.setText(error);
             tvError.setVisibility(VISIBLE);
