@@ -11,8 +11,11 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
+import android.support.v7.widget.AppCompatTextView;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.method.ScrollingMovementMethod;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
@@ -177,7 +180,6 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
         int heightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
         editText.measure(widthMeasureSpec, heightMeasureSpec);
         initHintAndErrorTextView();
-
     }
 
     private void initHintAndErrorTextView() {
@@ -190,11 +192,16 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
         errorParams.addRule(BELOW, editText.getId());
 
         ViewGroup.LayoutParams textParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        tvHint = new TextView(getContext());
+        tvHint = new AppCompatTextView(getContext());
         tvHint.setLayoutParams(textParams);
 
-        tvError = new TextView(getContext());
+        tvError = new AppCompatTextView(getContext());
+        tvError.setMovementMethod(new ScrollingMovementMethod());
+        tvError.setSingleLine(true);
+        tvError.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+        tvError.setSelected(true);
         tvError.setLayoutParams(textParams);
+
 
         addView(tvHint);
         addView(tvError, errorParams);
@@ -203,7 +210,6 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
         int widthMeasureSpec = MeasureSpec.makeMeasureSpec(getResources().getDisplayMetrics().widthPixels, MeasureSpec.AT_MOST);
         int heightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
         tvHint.measure(widthMeasureSpec, heightMeasureSpec);
-        tvError.measure(widthMeasureSpec, heightMeasureSpec);
 
 
         floatingDistance = -(editText.getMeasuredHeight() / 2);
@@ -249,6 +255,7 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
     }
 
     public void setError(@Nullable String error) {
+
         if (error == null) {
             if (isErrorShowing()) {
                 isError = false;
@@ -417,7 +424,7 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
         }
         hadFocus = true;
         if (hasFocus && editText.getText().length() == 0) {
-            if (!imm.isActive()) {
+            if (!getVisibilityKeyBoard()) {
                 postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -468,7 +475,6 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
         } else if (isErrorShowing()) {
             tvError.setVisibility(VISIBLE);
         }
-
     }
 
     @Override
