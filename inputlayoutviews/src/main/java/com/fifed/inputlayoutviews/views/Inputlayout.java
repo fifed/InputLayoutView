@@ -2,6 +2,8 @@ package com.fifed.inputlayoutviews.views;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.ArgbEvaluator;
+import android.animation.ValueAnimator;
 import android.app.Service;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -50,7 +52,7 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
     private OnChangeFocusListener onChangeFocusListener;
     private OnChangeTextListener onChangeTextListener;
     private OnErrorListener onErrorListener;
-    private boolean srarted, hadFocus, isError, isValid = true;;
+    private boolean srarted, hadFocus, isError, isValid = true;
     private InputMethodManager imm;
     private int floatingDistance;
     private static int inputType;
@@ -59,6 +61,11 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
     private int etDefaultBackground, etErrorBackground, etFocusedBackground, etFocusedErrorBackground;
     private TypedArray attributes;
 
+    private ArgbEvaluator argbEvaluator = new ArgbEvaluator();
+
+    @ColorInt
+    private int hintTextColor, hintTextColorFocused;
+    private boolean wasFocused;
 
     public Inputlayout(Context context) {
         super(context);
@@ -131,13 +138,18 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
         int errorSize = attributes.getDimensionPixelSize(R.styleable.Inputlayout_error_text_size, 0);
         int defaultHintSize = (int) (TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 18, getResources().getDisplayMetrics()));
         int defaultErrorSize = (int) (TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12, getResources().getDisplayMetrics()));
+
         tvHint.setTextSize(TypedValue.COMPLEX_UNIT_PX, hintSize == 0 ? defaultHintSize : hintSize);
         tvError.setTextSize(TypedValue.COMPLEX_UNIT_PX, errorSize == 0 ? defaultErrorSize : errorSize);
     }
 
     private void setHintErrorTextColor() {
         tvError.setTextColor(attributes.getColor(R.styleable.Inputlayout_error_default_color, Color.RED));
-        tvHint.setTextColor(attributes.getColor(R.styleable.Inputlayout_hint_color, Color.BLACK));
+
+        hintTextColor = attributes.getColor(R.styleable.Inputlayout_hint_color, Color.GRAY);
+        hintTextColorFocused = attributes.getColor(R.styleable.Inputlayout_hint_color_focused, hintTextColor);
+
+        tvHint.setTextColor(hintTextColorFocused);
     }
 
     private void adjustFloatingDistance() {
@@ -186,7 +198,7 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
 
         RelativeLayout.LayoutParams errorParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
-        if(editText.getId() == View.NO_ID){
+        if (editText.getId() == View.NO_ID) {
             editText.setId(editText.hashCode());
         }
         errorParams.addRule(BELOW, editText.getId());
@@ -237,17 +249,81 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
         tvError.setTextColor(color);
     }
 
-    public void setFloatingHintColor(@ColorInt int color) {
-        tvHint.setTextColor(color);
+    public void setHintColor(@ColorInt int color) {
+        hintTextColor = color;
+        forceInvalidateHintColor();
+    }
+
+    public void setHintColorFocused(@ColorInt int color) {
+        hintTextColorFocused = color;
+        forceInvalidateHintColor();
+    }
+
+    private void forceInvalidateHintColor() {
+        tvHint.setTextColor(isHintFocused() ? hintTextColorFocused : hintTextColor);
+    }
+
+    private void animateColorChange(final boolean isFocused) {
+        ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
+        anim.setDuration(ANIMATION_DURATION);
+        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                float animatedValue = (float) animation.getAnimatedValue();
+                int color = (int) argbEvaluator.evaluate(animatedValue,
+                        isFocused ? hintTextColorFocused : hintTextColor,
+                        isFocused ? hintTextColor : hintTextColorFocused
+                );
+                tvHint.setTextColor(color);
+            }
+        });
+        anim.start();
+    }
+
+    private void animateHint(final boolean isFocused) {
+        animateColorChange(isFocused);
+        if (isFocused) {
+            tvHint.animate()
+                    .translationY(floatingDistance)
+                    .scaleX(0.7f)
+                    .scaleY(0.7f)
+                    .setDuration(ANIMATION_DURATION)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            imm.showSoftInput(editText, 0);
+                        }
+                    });
+        } else {
+            tvHint.animate()
+                    .translationY(0)
+                    .scaleX(1)
+                    .scaleY(1)
+                    .setDuration(ANIMATION_DURATION)
+                    .start();
+        }
+    }
+
+
+    private boolean isHintFocused() {
+        return editText.getText().length() == 0;
     }
 
 
     protected void checkEditText() {
-        if (editText.getText().length() != 0) {
-            tvHint.animate().translationY(floatingDistance)
-                    .scaleX(0.7f).scaleY(0.7f).setDuration(ANIMATION_DURATION);
-        } else if (!editText.hasFocus())
-            tvHint.animate().translationY(0).scaleX(1).scaleY(1).setDuration(200);
+        boolean isMoreOneChar = editText.getText().length() != 0;
+        boolean hasFocus = editText.hasFocus();
+        if (wasFocused != (isMoreOneChar && !hasFocus)) {
+            wasFocused = isMoreOneChar && !hasFocus;
+            if (isMoreOneChar) {
+                animateHint(true);
+            } else if (!editText.hasFocus())
+                animateHint(false);
+        }
     }
 
     public void setError(@StringRes int error) {
@@ -263,7 +339,7 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
             }
 
         } else {
-            if(isError && error.equals(tvError.getText().toString())){
+            if (isError && error.equals(tvError.getText().toString())) {
                 return;
             }
             isError = true;
@@ -271,7 +347,7 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
             tvError.setVisibility(VISIBLE);
             tvError.animate().scaleY(1).scaleX(1).setListener(this).setDuration(ANIMATION_DURATION).start();
         }
-        if(onErrorListener != null){
+        if (onErrorListener != null) {
             onErrorListener.onError(error != null);
         }
         if (isError && hasFocus() && etFocusedErrorBackground != 0) {
@@ -336,14 +412,14 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
         }
     }
 
-    private void checkValidState(){
-        if(onChangeValidStateListener == null) {
+    private void checkValidState() {
+        if (onChangeValidStateListener == null) {
             return;
         }
         boolean isValidTemp = isValid;
         for (int i = 0; i < finishingValidatorList.size(); i++) {
             ValidatorResponse response = finishingValidatorList.get(i).isValidText(editText.getText().toString(), getContext());
-            if (!response.isValid()){
+            if (!response.isValid()) {
                 isValid = false;
                 break;
             } else {
@@ -351,7 +427,7 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
             }
         }
 
-        if(isValidTemp != isValid) {
+        if (isValidTemp != isValid) {
             onChangeValidStateListener.onChangeValidState(isValid);
         }
 
@@ -374,7 +450,7 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
             verifyFieldWithRuntimeValidators();
             checkValidState();
         }
-        if(onChangeTextListener != null){
+        if (onChangeTextListener != null) {
             onChangeTextListener.onChangeText(s.toString());
         }
     }
@@ -419,7 +495,7 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
 
     @Override
     public void onFocusChange(View v, boolean hasFocus) {
-        if(onChangeFocusListener != null){
+        if (onChangeFocusListener != null) {
             onChangeFocusListener.onChangeFocus(hasFocus);
         }
         hadFocus = true;
@@ -432,17 +508,11 @@ public class Inputlayout extends RelativeLayout implements View.OnFocusChangeLis
                     }
                 }, 1);
             }
-            tvHint.animate().translationY(floatingDistance).scaleX(0.7f).scaleY(0.7f).setDuration(ANIMATION_DURATION)
-                    .setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            imm.showSoftInput(editText, 0);
-                        }
-                    });
+            animateHint(true);
         } else if (editText.getText().length() == 0 && !isError) {
-            tvHint.animate().translationY(0).scaleX(1).scaleY(1).setDuration(ANIMATION_DURATION).start();
+            animateHint(false);
         } else if (editText.getText().length() == 0) {
-            tvHint.animate().translationY(0).scaleX(1).scaleY(1).setDuration(ANIMATION_DURATION).start();
+            animateHint(false);
             if (etErrorBackground != 0) {
                 editText.setBackgroundResource(etErrorBackground);
             }

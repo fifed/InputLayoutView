@@ -6,6 +6,7 @@
         <attr name="hint_text" format="string"/>
         <attr name="hint_text_size" format="dimension"/>
         <attr name="hint_color" format="color"/>
+        <attr name="hint_color_focused" format="color" />
         <attr name="hint_margin_top" format="dimension"/>
         <attr name="hint_margin_botom" format="dimension"/>
         <attr name="hint_margin_left" format="dimension"/>
